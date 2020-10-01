@@ -23,10 +23,10 @@ setuptools.setup(
     classifiers = [
         "Programming Language :: Python",
         "Programming Language :: Python :: 3",
-        "License :: OSI Approved :: BSD License",
+        "License :: OSI Approved :: CEA CNRS Inria Logiciel Libre License, version 2.1 (CeCILL-2.1)",
         "Development Status :: 3 - Alpha",
         "Operating System :: OS Independent",
-        "Intended Audience :: Science / Research",
+        "Intended Audience :: Science/Research",
         "Topic :: Software Development :: Libraries :: Python Modules",
         ],
     install_requires=install_requires,
