@@ -59,7 +59,7 @@ Direction des Etudes et Synthèses Economiques
 Département des Etudes Economiques  
 Division des Etudes Macroéconomiques
 
-Benjamin Favetto ([@BFavetto](https://github.com/BFavetto)) - Adrien Lagouge - Matthieu Lequien ([@MLequien](https://github.com/MLequien)) - Olivier Simon
+Alexandre Bourgeois - Benjamin Favetto ([@BFavetto](https://github.com/BFavetto)) - Adrien Lagouge - Matthieu Lequien ([@MLequien](https://github.com/MLequien)) - Olivier Simon
 
 
 
