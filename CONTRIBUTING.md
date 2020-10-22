@@ -4,8 +4,8 @@ All contributions, whatever their forms, are welcome.
 
 ### How ?
 
-* To declare a bug, or ask for an improvement, create an [*issue*] (https://github.com/InseeFrLab/Macronometrics/issues)
-* To contribute in code or documentation directly, you can use a [*Pull Request*] (https://github.com/InseeFrLab/Macronometrics/pulls). In this case, it is best to link it to an *issue*.
+* To declare a bug, or ask for an improvement, create an [*issue*](https://github.com/InseeFrLab/Macronometrics/issues)
+* To contribute in code or documentation directly, you can use a [*Pull Request*](https://github.com/InseeFrLab/Macronometrics/pulls). In this case, it is best to link it to an *issue*.
    * The commit messages, as well as the code itself, will preferably be written in English.
    * The documentation will be translated into both French and English.
 
@@ -34,4 +34,4 @@ git commit --amend -s
 
 ### Licence
 
-By contributing, you agree that your contributions will be licensed under the CeCILL license.
+By contributing, you agree that your contributions will be licensed under the [CeCILL license](LICENSE).
