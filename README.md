@@ -27,13 +27,15 @@ A macro model is defined by a set of static and dynamic equations, which determi
   * Install the package
   
  ~~~
+ cd Macronometrics
  python setup.py install
  ~~~
  
  * Clone the repository containing an illustrative model
  
  ~~~
- https://github.com/InseeFrLab/Macronometrics-Notebook.git
+ cd ..
+ git clone https://github.com/InseeFrLab/Macronometrics-Notebook.git
  ~~~
  
  * Run the Jupyter notebook ```Colibri.ipynb```
@@ -61,6 +63,11 @@ Division des Etudes Macroéconomiques
 
 Alexandre Bourgeois - Benjamin Favetto ([@BFavetto](https://github.com/BFavetto)) - Adrien Lagouge - Matthieu Lequien ([@MLequien](https://github.com/MLequien)) - Olivier Simon
 
+## Contributing
 
+[Contributing](.\CONTRIBUTING.md)
 
+## Licence
+
+[CeCILL license](.\LICENSE)
 
