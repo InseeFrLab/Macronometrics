@@ -3,3 +3,4 @@ numpy>=1.17.2
 pandas>=0.25.1
 tqdm>=4.32.2
 lark-parser>=0.7.1
+PyYAML>=3.11

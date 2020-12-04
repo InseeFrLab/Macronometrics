@@ -238,6 +238,21 @@ def simulate(df_mod, val_coeff, start_date, end_date, function_name, use_jac=Tru
         print('Model is not built yet. Build and write the model into a Python file')
         sys.exit()
 
+
+    # choix du solveur
+    try:
+        mdl_solver = importlib.import_module("numsolve")
+    except ModuleNotFoundError:
+        print('Problem with the solver module')
+        sys.exit()  
+
+    if method in ['sp_root','ggn11','newton','newton_alt'] :
+        solver = getattr(mdl_solver, method)
+    else :
+        raise ValueError("Unknown solver !")
+
+
+
     n_blocks = getattr(mdl, "n_blocks")  # nombre de blocs dans le modèle
 
     coln = getattr(mdl, "coln")  # Liste des noms de variables
@@ -332,120 +347,120 @@ def simulate(df_mod, val_coeff, start_date, end_date, function_name, use_jac=Tru
 
     return pd.DataFrame(data=data_result_np, index=data_sim.index, columns=coln)
 
-def simulate_cython(df_mod, val_coeff, start_date, end_date, function_name, use_jac=True, tol=1e-10, itm=1000, method='sp_root', dir="./modeles_cython"):
-    """
-    Simulation of a model from a cython module :
-    ============================================
-     * the dataframe df_mod contains all the endogenous/exogenous/policy variables
-     * simulation is performed between start_date and end_date (included)
+# def simulate_cython(df_mod, val_coeff, start_date, end_date, function_name, use_jac=True, tol=1e-10, itm=1000, method='sp_root', dir="./modeles_cython"):
+#     """
+#     Simulation of a model from a cython module :
+#     ============================================
+#      * the dataframe df_mod contains all the endogenous/exogenous/policy variables
+#      * simulation is performed between start_date and end_date (included)
 
 
-    Arguments :
-    ===========
-     * df_mod : pandas dataframe with the time series of the model
-     * val_coeff : dictionnary name : value for the coefficients of the model 
-     * start_date : date of the beginning of the simulation (format YYYYQ) 
-     * end_date : date of the end of the simulation (format YYYYQ)
-     * function_name : name of the python function associated with the model
-     * use_jac : True if the symbolic jacobian is used during the simulation
+#     Arguments :
+#     ===========
+#      * df_mod : pandas dataframe with the time series of the model
+#      * val_coeff : dictionnary name : value for the coefficients of the model 
+#      * start_date : date of the beginning of the simulation (format YYYYQ) 
+#      * end_date : date of the end of the simulation (format YYYYQ)
+#      * function_name : name of the python function associated with the model
+#      * use_jac : True if the symbolic jacobian is used during the simulation
 
-    """
+#     """
 
-    start_time = time.time()    # tic
+#     start_time = time.time()    # tic
     
-    # import sys
-    sys.path.insert(1, dir)
+#     # import sys
+#     sys.path.insert(1, dir)
 
-    # pour pouvoir importer le module Cython dans l'environnement courant
-    importlib.invalidate_caches()
-    try:
-        mdl = importlib.import_module(function_name)
-    except ModuleNotFoundError:
-        print('Model is not built yet. Build and compile the model into a Cython file')
-        sys.exit()
+#     # pour pouvoir importer le module Cython dans l'environnement courant
+#     importlib.invalidate_caches()
+#     try:
+#         mdl = importlib.import_module(function_name)
+#     except ModuleNotFoundError:
+#         print('Model is not built yet. Build and compile the model into a Cython file')
+#         sys.exit()
 
-    funmodel_n_blocks = getattr(mdl, function_name+"_n_blocks")
-    n_blocks = funmodel_n_blocks()  # nombre de blocs dans le modèle
+#     funmodel_n_blocks = getattr(mdl, function_name+"_n_blocks")
+#     n_blocks = funmodel_n_blocks()  # nombre de blocs dans le modèle
 
-    funmodel_coln = getattr(mdl, function_name+"_coln")
-    coln = funmodel_coln()  # Liste des noms de variables
+#     funmodel_coln = getattr(mdl, function_name+"_coln")
+#     coln = funmodel_coln()  # Liste des noms de variables
     
-    # Dictionnaire de correspondance des noms de variables
-    funmodel_dicovar = getattr(mdl, function_name+"_dicovar")
-    dicovar = funmodel_dicovar()
+#     # Dictionnaire de correspondance des noms de variables
+#     funmodel_dicovar = getattr(mdl, function_name+"_dicovar")
+#     dicovar = funmodel_dicovar()
 
-    funmodel_coeffs = getattr(mdl, function_name+"_coeffs")  # Liste des coefficients du modèle
-    coeffs = funmodel_coeffs()
+#     funmodel_coeffs = getattr(mdl, function_name+"_coeffs")  # Liste des coefficients du modèle
+#     coeffs = funmodel_coeffs()
 
-    # fonctions associées au modèle
-    # fonction permettant de récupérer les endogènes de chaque bloc
-    funmodel_varendo = getattr(mdl, function_name+"_varendo")
-    # fonction permettant de récupérer les correspondances de chaque bloc
-    funmodel_dicoendo = getattr(mdl, function_name+"_dicoendo")
+#     # fonctions associées au modèle
+#     # fonction permettant de récupérer les endogènes de chaque bloc
+#     funmodel_varendo = getattr(mdl, function_name+"_varendo")
+#     # fonction permettant de récupérer les correspondances de chaque bloc
+#     funmodel_dicoendo = getattr(mdl, function_name+"_dicoendo")
     
-    # on copie les colonnes utiles dans un nouveau data frame
-    # les colonnes sont bien ordonnées dans le data frame
-    data_sim = df_mod[coln].copy()
+#     # on copie les colonnes utiles dans un nouveau data frame
+#     # les colonnes sont bien ordonnées dans le data frame
+#     data_sim = df_mod[coln].copy()
     
-    # définition des dates au format pandas
-    start_date_pd = pd.to_datetime(start_date)
-    end_date_pd = pd.to_datetime(end_date)
+#     # définition des dates au format pandas
+#     start_date_pd = pd.to_datetime(start_date)
+#     end_date_pd = pd.to_datetime(end_date)
 
-    #identification du rang de la première date dans le dataframe
-    index_date = len(data_sim[str(data_sim.index[0]):start_date_pd])-1
+#     #identification du rang de la première date dans le dataframe
+#     index_date = len(data_sim[str(data_sim.index[0]):start_date_pd])-1
 
-    iter_dates = pd.date_range(start=start_date_pd, end=end_date_pd, freq="QS")
+#     iter_dates = pd.date_range(start=start_date_pd, end=end_date_pd, freq="QS")
 
-    # chargement des données du modèle sous forme de tableau
-    data_result_np = data_sim.to_numpy()  # au format np.array
+#     # chargement des données du modèle sous forme de tableau
+#     data_result_np = data_sim.to_numpy()  # au format np.array
  
-    n_simul = len(iter_dates)
+#     n_simul = len(iter_dates)
 
-    elapsed_time = time.time() - start_time  # toc
+#     elapsed_time = time.time() - start_time  # toc
 
-    print(f"Loading the model took {elapsed_time:.3f} seconds.\n")
+#     print(f"Loading the model took {elapsed_time:.3f} seconds.\n")
 
-    start_time = time.time()  # tic
+#     start_time = time.time()  # tic
 
-    for i in range(n_simul):
+#     for i in range(n_simul):
 
-        for count in range(n_blocks):
+#         for count in range(n_blocks):
 
-            # dictionnaire nom endogène -> colonne dans le tableau
-            nom_col_endo = funmodel_dicoendo(count)
-            # liste des noms des endogènes
-            list_var_endo = funmodel_varendo(count)
+#             # dictionnaire nom endogène -> colonne dans le tableau
+#             nom_col_endo = funmodel_dicoendo(count)
+#             # liste des noms des endogènes
+#             list_var_endo = funmodel_varendo(count)
 
-            # liste des indices des endogènes du bloc courant (A SIMPLIFIER !!!)
-            list_endo = list(nom_col_endo.values())
+#             # liste des indices des endogènes du bloc courant (A SIMPLIFIER !!!)
+#             list_endo = list(nom_col_endo.values())
 
-            # Récupération des fonctions du bloc
-            g = getattr(mdl, function_name+"_"+str(count))
+#             # Récupération des fonctions du bloc
+#             g = getattr(mdl, function_name+"_"+str(count))
 
-            if use_jac:    # utilisation du jacobien symbolique
-                g_jac = getattr(mdl, function_name+"_"+str(count)+"_jac")
-            else:
-                g_jac = False       # Jacobien approché numériquement
+#             if use_jac:    # utilisation du jacobien symbolique
+#                 g_jac = getattr(mdl, function_name+"_"+str(count)+"_jac")
+#             else:
+#                 g_jac = False       # Jacobien approché numériquement
 
-            x_start = np.zeros(len(list_var_endo))
+#             x_start = np.zeros(len(list_var_endo))
 
-            # initialisation de la méthode de résolution à la dernière date connue des endogènes
+#             # initialisation de la méthode de résolution à la dernière date connue des endogènes
 
-            x_start = data_result_np[index_date + i - 1, list_endo]
+#             x_start = data_result_np[index_date + i - 1, list_endo]
 
 
-            res_spo = spo.root(g, x_start, args=(
-                index_date+i, data_result_np, val_coeff), jac=g_jac, options={'xtol' : tol})
-            # mise à jour des endogènes pour le bloc suivant à la date courante
-            for j, item in enumerate(list_var_endo):
-                data_result_np[index_date + i,
-                                dicovar[item]] = res_spo.x[j]
+#             res_spo = spo.root(g, x_start, args=(
+#                 index_date+i, data_result_np, val_coeff), jac=g_jac, options={'xtol' : tol})
+#             # mise à jour des endogènes pour le bloc suivant à la date courante
+#             for j, item in enumerate(list_var_endo):
+#                 data_result_np[index_date + i,
+#                                 dicovar[item]] = res_spo.x[j]
 
-    elapsed_time = time.time() - start_time
+#     elapsed_time = time.time() - start_time
 
-    print(f"The simulation of the model took {elapsed_time:.3f} secondes.\n")
+#     print(f"The simulation of the model took {elapsed_time:.3f} secondes.\n")
 
-    return pd.DataFrame(data=data_result_np, index=data_sim.index, columns=coln)
+#     return pd.DataFrame(data=data_result_np, index=data_sim.index, columns=coln)
 
 
 

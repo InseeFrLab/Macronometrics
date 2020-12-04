@@ -531,14 +531,16 @@ class Model():
 
         self.is_built = True  # Le modèle est désormais construit.
 
-        if prod == "python":
-            self.write_model(function_name, dir)
-            write_yaml_file(self, function_name+".yaml", dir)
-        else:
-            self.write_model_cython(function_name, dir='./modeles_cython')
-            write_yaml_file(self, function_name+".yaml", dir='./modeles_cython')
+        # if prod == "python":
+        #     self.write_model(function_name, dir)
+        #     write_yaml_file(self, function_name+".yaml", dir)
+        # else:
+        #     self.write_model_cython(function_name, dir='./modeles_cython')
+        #     write_yaml_file(self, function_name+".yaml", dir='./modeles_cython')
 
-        #write_yaml_file(self, function_name+".yaml", dir)
+        self.write_model(function_name, dir)
+        write_yaml_file(self, function_name+".yaml", dir)
+
         return
 
     def copy(self):
@@ -689,209 +691,209 @@ class Model():
 
         return
 
-    def write_model_cython(self, function_name, dir="./modeles_cython"):
-        """
-        Creation of a Cython file containing the text of the model functions.
+    # def write_model_cython(self, function_name, dir="./modeles_cython"):
+    #     """
+    #     Creation of a Cython file containing the text of the model functions.
 
-        Arguments :
-        ===========
-        model : a preliminary analyzed model
-        function_name : name of the function (string)
-        dir : name of the directory (string)
+    #     Arguments :
+    #     ===========
+    #     model : a preliminary analyzed model
+    #     function_name : name of the function (string)
+    #     dir : name of the directory (string)
 
-        Result :
-        ========
-         * A .pyx file with the functions (for each block) and their jacobians.
+    #     Result :
+    #     ========
+    #      * A .pyx file with the functions (for each block) and their jacobians.
 
-        """
+    #     """
 
-        if (not self.is_built):
+    #     if (not self.is_built):
 
-            raise ValueError("The model is not built.")
+    #         raise ValueError("The model is not built.")
 
-        n_blocks = len(self.model_fun_block)
+    #     n_blocks = len(self.model_fun_block)
 
-        # Structures de données pour le traitement d'un bloc
+    #     # Structures de données pour le traitement d'un bloc
 
-        list_block_fun = []
-        list_block_varendo = []
-        list_block_jac = []
-        list_block_dicoendo = []
+    #     list_block_fun = []
+    #     list_block_varendo = []
+    #     list_block_jac = []
+    #     list_block_dicoendo = []
 
-        # sous la forme [ texte , var_endo , texte_jac ]
-        for item in self.model_fun_block:
-            list_block_fun.append(item[0])
-            list_block_varendo.append(item[1])
-            list_block_jac.append(item[2])
+    #     # sous la forme [ texte , var_endo , texte_jac ]
+    #     for item in self.model_fun_block:
+    #         list_block_fun.append(item[0])
+    #         list_block_varendo.append(item[1])
+    #         list_block_jac.append(item[2])
 
-            # pour chaque bloc, on construit un dictionnaire de correspondance
-            # endogène -> numero
-            nom_col_endo = {}
-            # on considère les endogènes du bloc courant
-            for endocourant in item[1]:
-                # correspondance nom / indice
-                nom_col_endo[endocourant] = self.dicovar[endocourant]
+    #         # pour chaque bloc, on construit un dictionnaire de correspondance
+    #         # endogène -> numero
+    #         nom_col_endo = {}
+    #         # on considère les endogènes du bloc courant
+    #         for endocourant in item[1]:
+    #             # correspondance nom / indice
+    #             nom_col_endo[endocourant] = self.dicovar[endocourant]
 
-            list_block_dicoendo.append(nom_col_endo)
+    #         list_block_dicoendo.append(nom_col_endo)
 
-        # texte de la fonction déterminant les endogènes pour chaque bloc
+    #     # texte de la fonction déterminant les endogènes pour chaque bloc
 
-        text_varendo = 'cpdef list ' + function_name.strip() + '_varendo(int num_block): \n'
-        text_pyd = 'cpdef list ' + function_name.strip() + '_varendo(int num_block)\n\n'
-        text_varendo += '\t"""\n \tFonction produite automatiquement pour la résolution du modèle \n\n'
-        text_varendo += '\tDétermine les endogènes associées à chaque bloc \n'
-        text_varendo += '\t\n\tArguments : \n'
-        text_varendo += '\t\tnum_block : numéro du bloc (décomposition de Dulmage-Mendelsohn) \n'
-        text_varendo += '\t\n\t""" \n'
-        text_varendo += '\tcdef list list_block_varendo = ['
+    #     text_varendo = 'cpdef list ' + function_name.strip() + '_varendo(int num_block): \n'
+    #     text_pyd = 'cpdef list ' + function_name.strip() + '_varendo(int num_block)\n\n'
+    #     text_varendo += '\t"""\n \tFonction produite automatiquement pour la résolution du modèle \n\n'
+    #     text_varendo += '\tDétermine les endogènes associées à chaque bloc \n'
+    #     text_varendo += '\t\n\tArguments : \n'
+    #     text_varendo += '\t\tnum_block : numéro du bloc (décomposition de Dulmage-Mendelsohn) \n'
+    #     text_varendo += '\t\n\t""" \n'
+    #     text_varendo += '\tcdef list list_block_varendo = ['
 
-        for item in list_block_varendo:
-            text_varendo += str(item) + " , \\\n\t\t"
+    #     for item in list_block_varendo:
+    #         text_varendo += str(item) + " , \\\n\t\t"
 
-        text_varendo += "] \n"
+    #     text_varendo += "] \n"
 
-        text_varendo += '\treturn list_block_varendo[num_block] \n'
+    #     text_varendo += '\treturn list_block_varendo[num_block] \n'
 
-        # texte de la fonction donnant la correspondance bloc -> endogènes
+    #     # texte de la fonction donnant la correspondance bloc -> endogènes
 
-        text_dicoendo = 'cpdef dict ' + \
-            function_name.strip() + '_dicoendo(int num_block): \n'
-        text_pyd += 'cpdef dict ' + \
-            function_name.strip() + '_dicoendo(int num_block)\n\n'
-        text_dicoendo += '\t"""\n \tFonction produite automatiquement pour la résolution du modèle \n\n'
-        text_dicoendo += '\tDétermine les correspondances des endogènes associées à chaque bloc \n'
-        text_dicoendo += '\t\n\tArguments : \n'
-        text_dicoendo += '\t\tnum_block : numéro du bloc (décomposition de Dulmage-Mendelsohn) \n'
-        text_dicoendo += '\t\n\t""" \n'
-        text_dicoendo += '\tcdef list list_block_dicoendo = ['
+    #     text_dicoendo = 'cpdef dict ' + \
+    #         function_name.strip() + '_dicoendo(int num_block): \n'
+    #     text_pyd += 'cpdef dict ' + \
+    #         function_name.strip() + '_dicoendo(int num_block)\n\n'
+    #     text_dicoendo += '\t"""\n \tFonction produite automatiquement pour la résolution du modèle \n\n'
+    #     text_dicoendo += '\tDétermine les correspondances des endogènes associées à chaque bloc \n'
+    #     text_dicoendo += '\t\n\tArguments : \n'
+    #     text_dicoendo += '\t\tnum_block : numéro du bloc (décomposition de Dulmage-Mendelsohn) \n'
+    #     text_dicoendo += '\t\n\t""" \n'
+    #     text_dicoendo += '\tcdef list list_block_dicoendo = ['
 
-        for item in list_block_dicoendo:
-            text_dicoendo += str(item) + " , \\\n\t\t"
+    #     for item in list_block_dicoendo:
+    #         text_dicoendo += str(item) + " , \\\n\t\t"
 
-        text_dicoendo += "] \n"
+    #     text_dicoendo += "] \n"
 
-        text_dicoendo += '\treturn list_block_dicoendo[num_block] \n'
+    #     text_dicoendo += '\treturn list_block_dicoendo[num_block] \n'
 
-        # préambule de la fonction associée à un bloc
+    #     # préambule de la fonction associée à un bloc
 
-        text_fun_pre = 'cpdef np.ndarray[DTYPE_t, ndim=1] ' + \
-            function_name.strip()
-        text_fun = '(np.ndarray[DTYPE_t, ndim=1] x, int t, np.ndarray[DTYPE_t, ndim=2] data, dict coeff): \n'
-        text_fun += '\t"""\n\tFonction produite automatiquement pour la résolution du modèle \n\n'
-        text_fun += '\tBloc représenté par la fonction F telle que F(x)=0 \n'
-        text_fun += '\t\n\tArguments : \n'
-        text_fun += '\t\tx : vecteur de variables endogènes contemporaines \n'
-        text_fun += '\t\tt : date courante (dans le tableau de données) \n'
-        text_fun += '\t\tdata : tableau numpy contenant les données du modèle \n'
-        text_fun += '\t\n\t""" \n'
+    #     text_fun_pre = 'cpdef np.ndarray[DTYPE_t, ndim=1] ' + \
+    #         function_name.strip()
+    #     text_fun = '(np.ndarray[DTYPE_t, ndim=1] x, int t, np.ndarray[DTYPE_t, ndim=2] data, dict coeff): \n'
+    #     text_fun += '\t"""\n\tFonction produite automatiquement pour la résolution du modèle \n\n'
+    #     text_fun += '\tBloc représenté par la fonction F telle que F(x)=0 \n'
+    #     text_fun += '\t\n\tArguments : \n'
+    #     text_fun += '\t\tx : vecteur de variables endogènes contemporaines \n'
+    #     text_fun += '\t\tt : date courante (dans le tableau de données) \n'
+    #     text_fun += '\t\tdata : tableau numpy contenant les données du modèle \n'
+    #     text_fun += '\t\n\t""" \n'
 
-        text_jac_pre = 'cpdef np.ndarray[DTYPE_t, ndim=2] ' + \
-            function_name.strip()
-        text_jac = '_jac(np.ndarray[DTYPE_t, ndim=1] x, int t, np.ndarray[DTYPE_t, ndim=2] data, dict coeff): \n'
-        text_jac += '\t"""\n\tFonction produite automatiquement pour la résolution du modèle \n\n'
-        text_jac += '\tJacobienne de la fonction associée au bloc \n'
-        text_jac += '\t\n\tArguments : \n'
-        text_jac += '\t\tx : vecteur de variables endogènes contemporaines \n'
-        text_jac += '\t\tt : date courante (dans le tableau de données) \n'
-        text_jac += '\t\tdata : tableau numpy contenant les données du modèle \n'
-        text_jac += '\t\n\t""" \n'
+    #     text_jac_pre = 'cpdef np.ndarray[DTYPE_t, ndim=2] ' + \
+    #         function_name.strip()
+    #     text_jac = '_jac(np.ndarray[DTYPE_t, ndim=1] x, int t, np.ndarray[DTYPE_t, ndim=2] data, dict coeff): \n'
+    #     text_jac += '\t"""\n\tFonction produite automatiquement pour la résolution du modèle \n\n'
+    #     text_jac += '\tJacobienne de la fonction associée au bloc \n'
+    #     text_jac += '\t\n\tArguments : \n'
+    #     text_jac += '\t\tx : vecteur de variables endogènes contemporaines \n'
+    #     text_jac += '\t\tt : date courante (dans le tableau de données) \n'
+    #     text_jac += '\t\tdata : tableau numpy contenant les données du modèle \n'
+    #     text_jac += '\t\n\t""" \n'
 
-        # Ecriture du fichier
+    #     # Ecriture du fichier
 
-        with open(dir+"/" + function_name+".pyx", "w+", encoding='utf-8') as out_file:
+    #     with open(dir+"/" + function_name+".pyx", "w+", encoding='utf-8') as out_file:
 
-            out_file.write("from libc.math cimport log, exp\n\n")
-            out_file.write("import numpy as np\n")
-            out_file.write("cimport numpy as np\n\n")
+    #         out_file.write("from libc.math cimport log, exp\n\n")
+    #         out_file.write("import numpy as np\n")
+    #         out_file.write("cimport numpy as np\n\n")
 
-            out_file.write("# Nombre de blocs du modèle\n")
-            out_file.write(
-                "cpdef int " + function_name.strip() + "_n_blocks(): \n")
-            out_file.write("\treturn " + str(n_blocks) + " \n\n")
+    #         out_file.write("# Nombre de blocs du modèle\n")
+    #         out_file.write(
+    #             "cpdef int " + function_name.strip() + "_n_blocks(): \n")
+    #         out_file.write("\treturn " + str(n_blocks) + " \n\n")
 
-            out_file.write("# Liste des noms de variables\n")
-            out_file.write("cpdef list " +
-                           function_name.strip() + "_coln(): \n")
-            out_file.write("\tcdef list coln = " +
-                           str(self.coln_list) + " \n\n")
-            out_file.write("\treturn coln \n\n")
+    #         out_file.write("# Liste des noms de variables\n")
+    #         out_file.write("cpdef list " +
+    #                        function_name.strip() + "_coln(): \n")
+    #         out_file.write("\tcdef list coln = " +
+    #                        str(self.coln_list) + " \n\n")
+    #         out_file.write("\treturn coln \n\n")
 
-            out_file.write(
-                "# Dictionnaire de correspondance des noms de variables\n")
-            out_file.write("cpdef dict " +
-                           function_name.strip() + "_dicovar():\n")
-            out_file.write("\tcdef dict dicovar = " +
-                           str(self.dicovar) + " \n\n")
-            out_file.write("\treturn dicovar \n\n")
+    #         out_file.write(
+    #             "# Dictionnaire de correspondance des noms de variables\n")
+    #         out_file.write("cpdef dict " +
+    #                        function_name.strip() + "_dicovar():\n")
+    #         out_file.write("\tcdef dict dicovar = " +
+    #                        str(self.dicovar) + " \n\n")
+    #         out_file.write("\treturn dicovar \n\n")
 
-            out_file.write("# Liste des noms de coefficients\n")
-            out_file.write("cpdef list " +
-                           function_name.strip() + "_coeffs():\n")
-            out_file.write("\tcdef list coeffs = " +
-                           str(self.name_coeff_list) + " \n")
-            out_file.write("\treturn coeffs \n\n")
+    #         out_file.write("# Liste des noms de coefficients\n")
+    #         out_file.write("cpdef list " +
+    #                        function_name.strip() + "_coeffs():\n")
+    #         out_file.write("\tcdef list coeffs = " +
+    #                        str(self.name_coeff_list) + " \n")
+    #         out_file.write("\treturn coeffs \n\n")
 
-            out_file.write(text_varendo)
-            out_file.write("\n")
+    #         out_file.write(text_varendo)
+    #         out_file.write("\n")
 
-            out_file.write(text_dicoendo)
-            out_file.write("\n")
+    #         out_file.write(text_dicoendo)
+    #         out_file.write("\n")
 
-            for i, item in enumerate(list_block_fun):
-                out_file.write(text_fun_pre+"_"+str(i)+text_fun + item + "\n\n")
-                out_file.write("\tcdef np.ndarray[DTYPE_t, ndim=1] res = f\n\n") 
-                out_file.write("\treturn res")
-                out_file.write("\n\n")
+    #         for i, item in enumerate(list_block_fun):
+    #             out_file.write(text_fun_pre+"_"+str(i)+text_fun + item + "\n\n")
+    #             out_file.write("\tcdef np.ndarray[DTYPE_t, ndim=1] res = f\n\n") 
+    #             out_file.write("\treturn res")
+    #             out_file.write("\n\n")
 
-                out_file.write(text_jac_pre+"_"+str(i) +
-                               text_jac+list_block_jac[i] + "\n\n")
-                out_file.write("\tcdef np.ndarray[DTYPE_t, ndim=2] res = df\n\n") 
-                out_file.write("\treturn res")
-                out_file.write("\n\n")
+    #             out_file.write(text_jac_pre+"_"+str(i) +
+    #                            text_jac+list_block_jac[i] + "\n\n")
+    #             out_file.write("\tcdef np.ndarray[DTYPE_t, ndim=2] res = df\n\n") 
+    #             out_file.write("\treturn res")
+    #             out_file.write("\n\n")
 
-        with open(dir+"/" + function_name+".pxd", "w+", encoding='utf-8') as out_file_2:
+    #     with open(dir+"/" + function_name+".pxd", "w+", encoding='utf-8') as out_file_2:
 
-            out_file_2.write("import numpy as np\ncimport numpy as np\n\n")
+    #         out_file_2.write("import numpy as np\ncimport numpy as np\n\n")
             
-            out_file_2.write("ctypedef np.double_t DTYPE_t\n\n")
+    #         out_file_2.write("ctypedef np.double_t DTYPE_t\n\n")
 
-            out_file_2.write(
-                    "cpdef int " + function_name.strip() + "_n_blocks() \n\n")
+    #         out_file_2.write(
+    #                 "cpdef int " + function_name.strip() + "_n_blocks() \n\n")
 
-            out_file_2.write("cpdef list " +
-                             function_name.strip() + "_coln() \n\n")
+    #         out_file_2.write("cpdef list " +
+    #                          function_name.strip() + "_coln() \n\n")
 
-            out_file_2.write("cpdef dict " +
-                             function_name.strip() + "_dicovar()\n")
+    #         out_file_2.write("cpdef dict " +
+    #                          function_name.strip() + "_dicovar()\n")
 
-            out_file_2.write("cpdef list " +
-                             function_name.strip() + "_coeffs()\n\n")
+    #         out_file_2.write("cpdef list " +
+    #                          function_name.strip() + "_coeffs()\n\n")
 
-            out_file_2.write(text_pyd)
+    #         out_file_2.write(text_pyd)
 
-            for i, item in enumerate(list_block_fun):
-                    out_file_2.write(
-                        text_fun_pre+"_"+str(i)+'(np.ndarray[DTYPE_t, ndim=1] x, int t, np.ndarray[DTYPE_t, ndim=2] data, dict coeff)\n\n')
-                    out_file_2.write(text_jac_pre+"_"+str(i) +
-                                 '_jac(np.ndarray[DTYPE_t, ndim=1] x, int t, np.ndarray[DTYPE_t, ndim=2] data, dict coeff)\n\n')
+    #         for i, item in enumerate(list_block_fun):
+    #                 out_file_2.write(
+    #                     text_fun_pre+"_"+str(i)+'(np.ndarray[DTYPE_t, ndim=1] x, int t, np.ndarray[DTYPE_t, ndim=2] data, dict coeff)\n\n')
+    #                 out_file_2.write(text_jac_pre+"_"+str(i) +
+    #                              '_jac(np.ndarray[DTYPE_t, ndim=1] x, int t, np.ndarray[DTYPE_t, ndim=2] data, dict coeff)\n\n')
 
-        with open(dir+"/setup_" + function_name+".py", "w+", encoding='utf-8') as out_file_3:
+    #     with open(dir+"/setup_" + function_name+".py", "w+", encoding='utf-8') as out_file_3:
 
-            out_file_3.write("from setuptools import setup\n\n" +
-                             "from Cython.Build import cythonize\n\n" +
-                             "from sys import version_info\n\n" +
-                             "import numpy\n\n" +
-                             "setup(\n" +
-                             "ext_modules=cythonize('"+function_name+".pyx',force=True, compiler_directives={'language_level' : version_info[0]}),\n" +
-                             'include_dirs=[numpy.get_include()],\n' +
-                             ')'
-                             )
+    #         out_file_3.write("from setuptools import setup\n\n" +
+    #                          "from Cython.Build import cythonize\n\n" +
+    #                          "from sys import version_info\n\n" +
+    #                          "import numpy\n\n" +
+    #                          "setup(\n" +
+    #                          "ext_modules=cythonize('"+function_name+".pyx',force=True, compiler_directives={'language_level' : version_info[0]}),\n" +
+    #                          'include_dirs=[numpy.get_include()],\n' +
+    #                          ')'
+    #                          )
 
-        # import os
+    #     # import os
 
-        # os.chdir(dir)
+    #     # os.chdir(dir)
 
-        # os.system("$ python setup_"+function_name+".py build_ext --inplace")
+    #     # os.system("$ python setup_"+function_name+".py build_ext --inplace")
 
-        return
+    #     return
 
