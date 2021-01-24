@@ -174,7 +174,7 @@ def newton(xinit,fun,jac,args,ftol=1e-10,itermax=1000,alphamin=0.05) :
 
     return (x0,f0,maxf0)
 
-def sp_root(xinit,fun,jac,args,ftol=1e-10) :
+def sp_root(xinit,fun,jac,args,ftol=1e-10,itermax=1000) :
     """
     Encapsulation de la méthode standard root de scipy
     x0 : valeur initiale 

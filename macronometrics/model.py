@@ -196,7 +196,7 @@ class Model():
         """
         if tab[0] == "policy":
             self.name_policy_list = tab[1:]
-        if tab[0] == "exogenous":
+        elif tab[0] == "exogenous":
             self.name_exo_list = tab[1:]
         elif tab[0] == "endogenous":
             self.name_endo_list = tab[1:]
