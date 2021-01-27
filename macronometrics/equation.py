@@ -17,7 +17,8 @@ class Equation():
         texte += "Coefficients : {} \n".format(self.coeff_name_list)
         texte += "Exogènes : {} \n".format(self.exo_name_list)
         texte += "Policy : {} \n".format(self.policy_name_list)
-        texte += "Endogènes : {} \n".format(self.endo_name_list)
+        texte += "Endogènes contemporaines : {} \n".format(self.endo_name_list)
+        texte += "Endogènes retardées : {} \n".format(self.endo_lag_name_list)
         return texte
 
     def __init__(self, name_eq, text_eq, num_eq):
@@ -45,6 +46,10 @@ class Equation():
         # dictionnaire endogènes contemporaines de l'équation -> indice global
         self.endo_eq_dict = dict()
         self.endo_name_list = []     # nom des endogènes de l'équation
+
+        # dictionnaire endogènes retardées de l'équation -> indice global
+        self.endo_lag_eq_dict = dict()
+        self.endo_lag_name_list = [] # nom des endogènes retardées de l'équation
 
         self.policy_eq_dict = dict()  # dictionnaire policy -> indice
         self.policy_name_list = []

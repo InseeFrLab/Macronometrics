@@ -39,6 +39,7 @@ def analyze_model(model):
     eq_exo_dict = model.eq_exo_dict
     eq_policy_dict = model.eq_policy_dict
     eq_endo_dict = model.eq_endo_dict
+    eq_endo_lag_dict = model.eq_endo_lag_dict
     eq_coeff_dict = model.eq_coeff_dict
 
     def analyse_eq(t, courant, num_eq):
@@ -155,6 +156,8 @@ def analyze_model(model):
 
                 if courant == 0:  # variable dont la valeur doit être déterminée
                     eq_endo_dict[num_eq] = eq_endo_dict[num_eq] | {nom}
+                else : # variable endogène retardée (valeur connue)
+                    eq_endo_lag_dict[num_eq] = eq_endo_lag_dict[num_eq] | {nom}
 
                 return
 
@@ -222,6 +225,8 @@ def analyze_model(model):
             eq_policy_dict[num_eq])
         model.eq_obj_dict[item].endo_name_list = unique_list(
             eq_endo_dict[num_eq])
+        model.eq_obj_dict[item].endo_lag_name_list = unique_list(
+            eq_endo_lag_dict[num_eq])
 
     model.name_endo_list = unique_list(
         name_endo_list)  # On a toutes les endogènes !
@@ -313,6 +318,9 @@ def derive_model(model, debug=False):
 
         for en in eq.endo_name_list:
             eq.endo_eq_dict[en] = dicovar[en]
+
+        for enl in eq.endo_lag_name_list:
+            eq.endo_lag_eq_dict[enl] = dicovar[enl]
 
         for po in eq.policy_name_list:
             eq.policy_eq_dict[en] = dicovar[po]
@@ -552,7 +560,10 @@ def write_yaml_file(model, yaml_filename,  dir="./modeles_python"):
     for item in model.eq_obj_dict.keys():
         mod_eq[item] = {'name_eq': model.eq_obj_dict[item].name_eq, 'text_eq': model.eq_obj_dict[item].text_eq, 'num_eq':  model.eq_obj_dict[item].num_eq,
                         'coeff_eq_dict': model.eq_obj_dict[item].coeff_eq_dict, 'coeff_name_list': model.eq_obj_dict[item].coeff_name_list,
-                        'endo_eq_dict': model.eq_obj_dict[item].endo_eq_dict, 'endo_name_list': model.eq_obj_dict[item].endo_name_list,
+                        'endo_eq_dict': model.eq_obj_dict[item].endo_eq_dict, 
+                        'endo_lag_eq_dict': model.eq_obj_dict[item].endo_lag_eq_dict,
+                        'endo_name_list': model.eq_obj_dict[item].endo_name_list,
+                        'endo_lag_name_list': model.eq_obj_dict[item].endo_lag_name_list,
                         'exo_eq_dict': model.eq_obj_dict[item].exo_eq_dict, 'exo_name_list': model.eq_obj_dict[item].exo_name_list,
                         'policy_eq_dict': model.eq_obj_dict[item].policy_eq_dict, 'policy_name_list': model.eq_obj_dict[item].policy_name_list}
 

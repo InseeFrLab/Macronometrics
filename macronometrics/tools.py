@@ -28,6 +28,7 @@ def verif_model(model):
     - nombre d'endogènes == nombre d'équations
     - déclaration des variables 
     - données présentes
+    - pas de variables endogènes non contemporaines
     """
 
     # A compléter
@@ -241,7 +242,7 @@ def simulate(df_mod, val_coeff, start_date, end_date, function_name, use_jac=Tru
 
     # choix du solveur
     try:
-        mdl_solver = importlib.import_module("numsolve")
+        mdl_solver = importlib.import_module("macronometrics.numsolve")
     except ModuleNotFoundError:
         print('Problem with the solver module')
         sys.exit()  
