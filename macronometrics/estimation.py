@@ -80,7 +80,7 @@ class Estim():
         self.data_eq = df_mod[self.var_list_loc].copy()
 
 
-    def create_estimfun_python(self):
+    def create_estimfun_python(self,create_resid=False):
         """ 
         Permet la traduction d'une  équation en python pour l'estimation de ses coefficients.
         Le modèle doit être analysé avec les outils de la bibliothèque Analyse.
@@ -339,11 +339,22 @@ class Estim():
 
         texte_eq = run_instruction(eq_parse, 0)
 
-        res_block = "\t_res = 0\n"
-        res_block += "\tfor _t in range(_t_start,_t_stop):\n"
-        res_block += "\t\t_res += ("
-        res_block += texte_eq   # on met à jour le texte de la fonction
-        res_block += ")**2\n"
+        if create_resid :
+
+            res_block = "def _f_resid(_z,_t,_data):\n"
+            res_block += "\treturn "
+            res_block += texte_eq
+
+        else:
+
+
+            res_block = "def _f_estim(_z,_t_start,_t_stop,_data):\n"
+            res_block += "\t_res = 0\n"
+            res_block += "\tfor _t in range(_t_start,_t_stop):\n"
+            res_block += "\t\t_res += ("
+            res_block += texte_eq   # on met à jour le texte de la fonction
+            res_block += ")**2\n"
+            res_block += "\treturn _res\n"
 
 
             # # ensemble des endogènes contemporaines de l'équation
