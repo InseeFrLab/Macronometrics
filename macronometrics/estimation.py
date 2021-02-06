@@ -267,26 +267,17 @@ class Estim():
             elif t.data == "var":
                 nom = str(t.children[0])
 
-                # cas d'une variable exogène ou policy
-                # if (nom in self.list_exo_block):
+                
+                if (nom in self.var_list_loc):
                     # on cherche dans la base de données du modèle la valeur
-                return "_data[_t-"+str(courant)+"," + str(dicovar[nom]) + "]"
+                    return "_data[_t-"+str(courant)+"," + str(dicovar[nom]) + "]"
 
-                # elif nom in self.list_endo_block:  # cas d'une variable endogène
+                elif nom in self.coeff_name_list :
+                    # on va chercher le coefficient dans un dictionnaire
+                    return "_z[" + str(self.coeff_eq_dict_loc[nom]) + "]"
 
-                #     if courant == 0:  # variable dont la valeur doit être déterminée
-
-                #         return "x["+str(self.list_endo_block.index(nom))+"]"
-
-                #     else:  # on cherche dans la base de données du modèle
-                #         return "data[t-"+str(courant)+"," + str(dicovar[nom]) + "]"
-
-                # elif nom in name_coeff_list:
-                #     # on va chercher le coefficient dans un dictionnaire
-                #     return "coeff['" + nom + "']"
-
-                # else:
-                #     raise ValueError("Le modèle doit être analysé !")
+                else:
+                    raise ValueError("Le modèle doit être analysé !")
 
             elif t.data == "log":
                 op = t.children[0]
