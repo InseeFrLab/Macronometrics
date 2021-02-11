@@ -10,6 +10,8 @@ import sys
 
 from scipy.optimize import root
 
+from .numsolve import newton, newton_alt, ggn11
+
 import importlib 
 from time import time
 
@@ -327,20 +329,24 @@ def simulate(df_mod, val_coeff, start_date, end_date, function_name, use_jac=Tru
 
             x_start = data_result_np[index_date + i - 1, list_endo]
 
-            # if (method == 'ggn11'):
-            #     (x_res, _, _) = ggn11(x_start, g, g_jac, ftol=tol, itermax=itm,
-            #                           alphamin=0.05, args=(index_date+i, data_result_np, val_coeff))
-            #     for j, item in enumerate(list_var_endo):
-            #         data_result_np[index_date + i, dicovar[item]
-            #                        ] = x_res[j]  # mise à jour des résultats
+            if (method == 'ggn11'):
+                (x_res, _, _) = ggn11(x_start, g, g_jac, ftol=tol, itermax=itm,
+                                      alphamin=0.05, args=(index_date+i, data_result_np, val_coeff))
+                for j, item in enumerate(list_var_endo):
+                    data_result_np[index_date + i, dicovar[item]] = x_res[j]  # mise à jour des résultats
 
-            # else:  # on utilise fsolve à la place de root pour voir ? ...
-            res_spo = root(g, x_start, args=(
-                index_date+i, data_result_np, val_coeff), jac=g_jac, options={'xtol' : tol})
-            # mise à jour des endogènes pour le bloc suivant à la date courante
-            for j, item in enumerate(list_var_endo):
-                data_result_np[index_date + i,
-                                dicovar[item]] = res_spo.x[j]
+            elif (method == 'sp_root'):  # on utilise fsolve à la place de root pour voir ? ...
+                res_spo = root(g, x_start, args=(index_date+i, data_result_np, val_coeff), jac=g_jac, options={'xtol' : tol})
+                # mise à jour des endogènes pour le bloc suivant à la date courante
+                for j, item in enumerate(list_var_endo):
+                    data_result_np[index_date + i,dicovar[item]] = res_spo.x[j]
+
+            elif (method == 'newton'):
+                (x_res, _, _) = newton(x_start, g, g_jac, ftol=tol, itermax=itm,
+                                      alphamin=0.05, args=(index_date+i, data_result_np, val_coeff))
+                for j, item in enumerate(list_var_endo):
+                    data_result_np[index_date + i, dicovar[item]] = x_res[j]  # mise à jour des résultats
+
 
     elapsed_time = time() - start_time
 
