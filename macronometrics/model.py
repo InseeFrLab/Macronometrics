@@ -67,11 +67,12 @@ class Model():
 
         self.var_eq_dict = dict()   # correspondance variable : équation
 
-        # correspondances numéro d'équation : variables (exo / policy / endo / coeff)
+        # correspondances numéro d'équation : variables (exo / policy / endo / coeff) + endogènes retardées (pour l'analyse du modèle)
         self.eq_exo_dict = dict()
         self.eq_policy_dict = dict()
         self.eq_endo_dict = dict()
         self.eq_coeff_dict = dict()
+        self.eq_endo_lag_dict = dict()
 
         self.symboles_dict = dict()         # statut des symboles (pour les variantes)
         self.vall_set = set()               # ensemble des variables
@@ -156,6 +157,7 @@ class Model():
                                 self.eq_exo_dict[compte_eq] = set()
                                 self.eq_policy_dict[compte_eq] = set()
                                 self.eq_endo_dict[compte_eq] = set()
+                                self.eq_endo_lag_dict[compte_eq] = set()
                                 self.eq_coeff_dict[compte_eq] = set()
                                 compte_eq += 1
 
@@ -167,6 +169,7 @@ class Model():
                                 self.eq_exo_dict[compte_eq] = set()
                                 self.eq_policy_dict[compte_eq] = set()
                                 self.eq_endo_dict[compte_eq] = set()
+                                self.eq_endo_lag_dict[compte_eq] = set()
                                 self.eq_coeff_dict[compte_eq] = set()
                                 compte_eq += 1
 
